@@ -1,0 +1,7 @@
+D:\Projects\Parser_Test\bin\Debug\Parser_Test.exe.config
+D:\Projects\Parser_Test\bin\Debug\Parser_Test.exe
+D:\Projects\Parser_Test\bin\Debug\Parser_Test.pdb
+D:\Projects\Parser_Test\obj\Debug\CourseProjectParserCodeCS.csprojResolveAssemblyReference.cache
+D:\Projects\Parser_Test\obj\Debug\CourseProjectParserCodeCS.csproj.CoreCompileInputs.cache
+D:\Projects\Parser_Test\obj\Debug\Parser_Test.exe
+D:\Projects\Parser_Test\obj\Debug\Parser_Test.pdb
