@@ -1,0 +1,7 @@
+private void ConnectCodeList()
+        {
+            foreach (string s in codeList)
+            {
+                codeString += s;
+            }
+        }

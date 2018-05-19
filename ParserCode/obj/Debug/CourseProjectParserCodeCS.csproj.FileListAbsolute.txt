@@ -12,3 +12,10 @@ D:\CourseProjectParserCode\CourseProjectParserCode\Parser_Test\obj\Debug\CourseP
 D:\CourseProjectParserCode\CourseProjectParserCode\Parser_Test\obj\Debug\CourseProjectParserCodeCS.csproj.CoreCompileInputs.cache
 D:\CourseProjectParserCode\CourseProjectParserCode\Parser_Test\obj\Debug\ParserCode.exe
 D:\CourseProjectParserCode\CourseProjectParserCode\Parser_Test\obj\Debug\ParserCode.pdb
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\bin\Debug\ParserCode.exe.config
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\bin\Debug\ParserCode.exe
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\bin\Debug\ParserCode.pdb
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\CourseProjectParserCodeCS.csprojResolveAssemblyReference.cache
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\CourseProjectParserCodeCS.csproj.CoreCompileInputs.cache
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\ParserCode.exe
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\ParserCode.pdb
