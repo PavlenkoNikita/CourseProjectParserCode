@@ -10,7 +10,7 @@ namespace ParserCode
     class CodeDescription
     {
         private Stack<string> callsConstructions;
-        private Stack<string> iterators;
+       // private Stack<string> iterators;
         private Stack<bool> Brackets;
         private Stack<int> countStrAfterConstruction;
         private Stack<string> callCycle;
@@ -44,7 +44,7 @@ namespace ParserCode
             programStrings = linesCode;
             callsConstructions = new Stack<string>();
             Brackets = new Stack<bool>();
-            iterators = new Stack<string>();
+            //iterators = new Stack<string>();
             countStrAfterConstruction = new Stack<int>();
             callCycle = new Stack<string>();
             parsedCode = new List<ParsedStr>();
@@ -101,12 +101,12 @@ namespace ParserCode
                         CheckAndCommentForConstruction(ref i);
                         continue;
                     }
-                    ////Foreach
-                    //if (stringForeach.IsMatch(programStrings[i]))
-                    //{
-                    //    CheckAndCommentForeachConstruction(ref i);
-                    //    continue;
-                    //}
+                    //Foreach
+                    if (stringForeach.IsMatch(programStrings[i]))
+                    {
+                        CheckAndCommentForeachConstruction(ref i);
+                        continue;
+                    }
                     //While
                     if (stringWhile.IsMatch(programStrings[i]))
                     {
@@ -377,7 +377,7 @@ namespace ParserCode
             {
                 if (callsConstructions.Peek() == "CASE" || callsConstructions.Peek() == "DEFAULT")
                 {
-                    parsedCode.Add(new ParsedStr("END" + callsConstructions.Pop(), ""));
+                    parsedCode.Add(new ParsedStr("END " + callsConstructions.Pop(), ""));
                     if (Brackets.Peek() == true)
                     {
                         if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "SIMPLE")
@@ -567,7 +567,7 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add(new ParsedStr("START DEFAULT", ""));
+            parsedCode.Add(new ParsedStr("START ", ""));
 
             if (programStrings[index + 1] == "{")
             {
@@ -642,11 +642,11 @@ namespace ParserCode
         {
             if (stringIf.IsMatch(programStrings[index + 1]) == true)
             {
-                callsConstructions.Push("ELSEIF");
+                callsConstructions.Push("IF");
                 int countStr = countStrAfterConstruction.Pop();
                 countStrAfterConstruction.Push(++countStr);
                 countStrAfterConstruction.Push(0);
-                parsedCode.Add(new ParsedStr("START ELSEIF", "" +
+                parsedCode.Add(new ParsedStr("START IF", "" +
                     stringIf.Match(programStrings[index + 1]).Groups["ConditionIF"]));
                 index++;
                 if (programStrings[index + 1] == "{")
@@ -684,9 +684,18 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add(new ParsedStr("VAR BLOCK", "" + stringFor.Match(programStrings[index]).Groups["Iterators"]));
-            parsedCode.Add(new ParsedStr("START FOR", "" + stringFor.Match(programStrings[index]).Groups["ConditionFOR"]));
-            iterators.Push("" + stringFor.Match(programStrings[index]).Groups["IteratorChanger"]);
+            if ( "" + stringFor.Match(programStrings[index]).Groups["ConditionFOR"] == "")
+            {
+                parsedCode.Add(new ParsedStr("START FOR", stringFor.Match(programStrings[index]).Groups["Iterators"] +
+                ";true;" +
+                stringFor.Match(programStrings[index]).Groups["IteratorChanger"]));
+            }
+            else
+            {
+                parsedCode.Add(new ParsedStr("START FOR", stringFor.Match(programStrings[index]).Groups["Iterators"] +
+                ";" + stringFor.Match(programStrings[index]).Groups["ConditionFOR"] + ";" +
+                stringFor.Match(programStrings[index]).Groups["IteratorChanger"]));
+            }
             callCycle.Push("FOR");
             if (programStrings[index + 1] == "{")
             {
@@ -701,13 +710,17 @@ namespace ParserCode
 
         private void CheckAndCommentForeachConstruction(ref int index)
         {
-            callsConstructions.Push("FOREACH");
+            callsConstructions.Push("FOR");
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add(new ParsedStr("VAR BLOCK", "" + stringFor.Match(programStrings[index]).Groups["Iterators"]));
-            parsedCode.Add(new ParsedStr("VAR BLOCK", "" + stringFor.Match(programStrings[index]).Groups["Iterators"]));
-            iterators.Push("" + stringForeach.Match(programStrings[index]).Groups["IteratorChanger"]);
+            
+            parsedCode.Add(new ParsedStr("START FOR", stringForeach.Match(programStrings[index]).Groups["TypeVariable"] + " " +
+                stringForeach.Match(programStrings[index]).Groups["NameVariable"] + " = " +
+                stringForeach.Match(programStrings[index]).Groups["Collection"] + "[0];" +
+                stringForeach.Match(programStrings[index]).Groups["NameVariable"] + " != " +
+                stringForeach.Match(programStrings[index]).Groups["Collection"] + "[" +
+                stringForeach.Match(programStrings[index]).Groups["Collection"] + ".Length - 1];" + stringForeach.Match(programStrings[index]).Groups["NameVariable"] + "++"));
             callCycle.Push("FOR");
             if (programStrings[index + 1] == "{")
             {
@@ -732,10 +745,6 @@ namespace ParserCode
                     }
                 case "FOR":
                     {
-                        if (iterators.Peek() != "")
-                        {
-                            parsedCode.Add(new ParsedStr("VAR BLOCK", iterators.Pop()));
-                        }
                         checkEndConstruction = true;
                         callCycle.Pop();
                         break;
@@ -770,11 +779,6 @@ namespace ParserCode
                         checkEndConstruction = true;
                         break;
                     }
-                case "ELSEIF":
-                    {
-                        checkEndConstruction = true;
-                        break;
-                    }
                 case "SIMPLE":
                     {
                         callsConstructions.Pop();
@@ -797,10 +801,6 @@ namespace ParserCode
             {
                 case "FOR":
                     {
-                        if (iterators.Peek() != "")
-                        {
-                            parsedCode.Add(new ParsedStr("VAR BLOCK", iterators.Pop()));
-                        }
                         checkEndConstruction = true;
                         callCycle.Pop();
                         break;
@@ -821,11 +821,6 @@ namespace ParserCode
                         checkEndConstruction = true;
                         break;
                     }
-                case "ELSEIF":
-                    {
-                        checkEndConstruction = true;
-                        break;
-                    }
             }
             if (checkEndConstruction == true)
             {
@@ -837,9 +832,9 @@ namespace ParserCode
 
         public void ShowCode()
         {
-            for (int i = 0; i < parsedCode.Count; i++)
+            foreach(ParsedStr s in parsedCode)
             {
-                parsedCode[i].Show();
+                s.Show();
             }
         }
     }

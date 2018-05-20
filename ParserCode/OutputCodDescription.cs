@@ -8,9 +8,9 @@ namespace ParserCode
 {
     class OutputCodDescription
     {
-        public List<string> DescriptCode { private set; get; }
+        public List<ParsedStr> DescriptCode { private set; get; }
 
-        public OutputCodDescription(List<string> Dcode)
+        public OutputCodDescription(List<ParsedStr> Dcode)
         {
             this.DescriptCode = Dcode;
         }

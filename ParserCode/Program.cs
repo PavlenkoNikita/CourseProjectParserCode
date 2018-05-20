@@ -39,6 +39,7 @@ namespace ParserCode
             //Regex stringForeach = new Regex(@"^foreach\s?\(\s?(?<TypeVariable>[_A-Za-z0-9]+)\s(?<NameVariable>[_A-Za-z0-9]+) in (?<Collection>[_A-Za-z0-9\[\]]+)\s?\)$");
             //Console.WriteLine(stringForeach.IsMatch("foreach(int a in massive)"));
 
+
             InputCode f = new InputCode("Test.txt");
             f.ReadFile();
             string s = f.codeString;

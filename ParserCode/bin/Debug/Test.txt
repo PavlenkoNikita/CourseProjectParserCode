@@ -1,9 +1,7 @@
-public ref Book GetBookByTitle(string title)
-    {
-        for (int ctr = 0; ctr < books.Length; ctr++)
+private void ConnectCodeList()
         {
-            if (title == books[ctr].Title)
-                return ref books[ctr];
+            foreach(string s in listString)
+            {
+                codeString += s;
+            }
         }
-        return ref nobook;
-    }
