@@ -15,7 +15,7 @@ namespace ParserCode
         private Stack<int> countStrAfterConstruction;
         private Stack<string> callCycle;
         private List<string> programStrings;
-        //private bool simpleBlock = false;
+        public List<ParsedStr> parsedCode;
         private Regex stringMethod = new Regex(@"^(?<Accept>(static)*\s*(public|private|protected|internal|protected internal|private protected|)\s*(static)*)\s*(?<ReturnTypeMethod>[A-Za-z0-9\[\]_]+) (?<MethodName>[a-zA-Z0-9 _]+)\((?<Params>[A-Za-z0-9, _\[\]]*)\)$");
         private Regex stringInputOutput = new Regex(@"^Console.(Write|Read).*\((?<IOText>.*)\);$");
         private Regex stringSwitch = new Regex(@"^switch\s?\((?<variableSWITCH>.+)\)$");
@@ -24,6 +24,7 @@ namespace ParserCode
         private Regex stringCreateVariable = new Regex(@"^(?<Type>[_0-9a-zA-Z\[,\]]+)\s(?<Variable>[_0-9a-zA-Z]+)\s?=?\s?(?<Value>.+)?;$");
         private Regex stringChangeVariable = new Regex(@"^(?<LValue>.+)\s?=\s?(?<RValue>.+);$");
         private Regex stringFor = new Regex(@"^for\s?\((?<Iterators>.*);(?<ConditionFOR>.*);(?<IteratorChanger>.*)\)$");
+        private Regex stringForeach = new Regex(@"^foreach\s?\(\s?(?<TypeVariable>[_A-Za-z0-9]+)\s(?<NameVariable>[_A-Za-z0-9]+) in (?<Collection>[_A-Za-z0-9\[\]]+)\s?\)$");
         private Regex stringIf = new Regex(@"^if\s?\((?<ConditionIF>.*)\)$");
         private Regex stringCallMethod = new Regex(@"^((?<Objects>.*)\.)?(?<NameMethod>.+)\((?<Arguments>.*)\);$");
         private Regex stringDo = new Regex(@"^do$");
@@ -36,8 +37,7 @@ namespace ParserCode
         private Regex stringEndGoto = new Regex(@"^(?<NamePlaceTransition>.*):$");
         private Regex stringReturn = new Regex(@"^return\s?(?<ReturnData>.*)?;$");
         private Regex stringIncDec = new Regex(@"^(((\+\+)|(--))(?<Varivable>[_0-9a-zA-Z\[,\]]+))|((?<Varivable>[_0-9a-zA-Z\[,\]]+)((\+\+)|(--)));$");
-
-        private List<string> parsedCode;
+        
 
         public CodeDescription(List<string> linesCode)
         {
@@ -47,7 +47,7 @@ namespace ParserCode
             iterators = new Stack<string>();
             countStrAfterConstruction = new Stack<int>();
             callCycle = new Stack<string>();
-            parsedCode = new List<string>();
+            parsedCode = new List<ParsedStr>();
         }
 
         public void LineReading()
@@ -101,6 +101,12 @@ namespace ParserCode
                         CheckAndCommentForConstruction(ref i);
                         continue;
                     }
+                    ////Foreach
+                    //if (stringForeach.IsMatch(programStrings[i]))
+                    //{
+                    //    CheckAndCommentForeachConstruction(ref i);
+                    //    continue;
+                    //}
                     //While
                     if (stringWhile.IsMatch(programStrings[i]))
                     {
@@ -145,14 +151,14 @@ namespace ParserCode
             bool checkBlock = false;
             if (stringInputOutput.IsMatch(programStrings[index]))
             {
-                parsedCode.Add("IO BLOCK |" + stringInputOutput.Match(programStrings[index]).Groups["IOText"]);
+                parsedCode.Add(new ParsedStr("IO BLOCK", "" + stringInputOutput.Match(programStrings[index]).Groups["IOText"]));
                 checkBlock = true;
             }
             else if (stringStartGoto.IsMatch(programStrings[index]))
             {
+                parsedCode.Add(new ParsedStr("START LINK", programStrings[index]));
                 if (callsConstructions.Peek() == "CASE" || callsConstructions.Peek() == "DEFAULT")
                 {
-                    parsedCode.Add("START LINK |" + programStrings[index]);
                     if (Brackets.Peek() == true)
                     {
                         if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "SIMPLE")
@@ -212,7 +218,6 @@ namespace ParserCode
                 }
                 else
                 {
-                    parsedCode.Add("START LINK |" + programStrings[index]);
                     if (Brackets.Peek() == true && programStrings[index + 1] != "}")
                     {
                         int tempCountBrackets = 0;
@@ -244,15 +249,16 @@ namespace ParserCode
             }
             else if (stringEndGoto.IsMatch(programStrings[index]) && stringCase.IsMatch(programStrings[index]) == false && stringDefault.IsMatch(programStrings[index]) == false)
             {
-                parsedCode.Add("END LINK |" + programStrings[index]);
+                parsedCode.Add(new ParsedStr("END LINK", programStrings[index]));
                 checkBlock = true;
             }
             else if (stringReturn.IsMatch(programStrings[index]))
             {
+                parsedCode.Add(new ParsedStr("RETURN", "" + stringReturn.Match(programStrings[index]).Groups["ReturnData"]));
+                
                 if (callsConstructions.Peek() == "CASE" || callsConstructions.Peek() == "DEFAULT")
                 {
-                    parsedCode.Add("RETURN|" + stringReturn.Match(programStrings[index]).Groups["ReturnData"]);
-                    parsedCode.Add("END METHOD|");
+                    parsedCode.Add(new ParsedStr("END METHOD", ""));
                     if (Brackets.Peek() == true)
                     {
                         if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "SIMPLE")
@@ -313,15 +319,14 @@ namespace ParserCode
                     Brackets.Pop();
                 }
                 else
-                {
-                    parsedCode.Add("RETURN |" + stringReturn.Match(programStrings[index]).Groups["ReturnData"]);
+                {                    
                     if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "METHOD")
                     {
                         
                     }
                     else
                     {
-                        parsedCode.Add("END METHOD |");
+                        parsedCode.Add(new ParsedStr("END METHOD", ""));
                     }
 
                     if (Brackets.Peek() == true && programStrings[index + 1] != "}")
@@ -358,31 +363,21 @@ namespace ParserCode
                 }
                 checkBlock = true;
             }
-            else if (stringCreateVariable.IsMatch(programStrings[index]))
+            else if (stringCreateVariable.IsMatch(programStrings[index]) || stringChangeVariable.IsMatch(programStrings[index]) || stringIncDec.IsMatch(programStrings[index]))
             {
-                parsedCode.Add("VAR BLOCK |" + programStrings[index]);
-                checkBlock = true;
-            }
-            else if (stringChangeVariable.IsMatch(programStrings[index]))
-            {
-                parsedCode.Add("VAR BLOCK |" + programStrings[index]);
-                checkBlock = true;
-            }
-            else if (stringIncDec.IsMatch(programStrings[index]))
-            {
-                parsedCode.Add("VAR BLOCK |" + programStrings[index]);
+                parsedCode.Add(new ParsedStr("VAR BLOCK", programStrings[index]));
                 checkBlock = true;
             }
             else if (stringCallMethod.IsMatch(programStrings[index]))
             {
-                parsedCode.Add("FUNC BLOCK |" + programStrings[index]);
+                parsedCode.Add(new ParsedStr("FUNC BLOCK", programStrings[index]));
                 checkBlock = true;
             }
             else if (stringBreak.IsMatch(programStrings[index]))
             {
                 if (callsConstructions.Peek() == "CASE" || callsConstructions.Peek() == "DEFAULT")
                 {
-                    parsedCode.Add("END " + callsConstructions.Pop() + " |");
+                    parsedCode.Add(new ParsedStr("END" + callsConstructions.Pop(), ""));
                     if (Brackets.Peek() == true)
                     {
                         if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "SIMPLE")
@@ -444,7 +439,7 @@ namespace ParserCode
                 }
                 else
                 {
-                    parsedCode.Add("END " + callCycle.Peek() + " |" + programStrings[index]);
+                    parsedCode.Add(new ParsedStr("END " + callCycle.Peek(), programStrings[index]));
                     if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "SIMPLE")
                     {
                         index++;
@@ -481,7 +476,7 @@ namespace ParserCode
             }
             else if (stringContinue.IsMatch(programStrings[index]))
             {
-                parsedCode.Add("CONTINUE " + callCycle.Peek() + " |");
+                parsedCode.Add(new ParsedStr("CONTINUE " + callCycle.Peek(), ""));
                 if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "SIMPLE")
                 {
                     index++;
@@ -529,10 +524,10 @@ namespace ParserCode
             callsConstructions.Push("METHOD");
             Brackets.Push(true);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add("START METHOD |" +
+            parsedCode.Add(new ParsedStr("START METHOD", 
                 stringMethod.Match(programStrings[index]).Groups["ReturnTypeMethod"] +
                 " " + stringMethod.Match(programStrings[index]).Groups["MethodName"] +
-                "(" + stringMethod.Match(programStrings[index]).Groups["Params"] + ")");
+                "(" + stringMethod.Match(programStrings[index]).Groups["Params"] + ")"));
             index++;
         }
 
@@ -544,7 +539,7 @@ namespace ParserCode
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
             callCycle.Push("DWHILE");
-            parsedCode.Add("START DO |");
+            parsedCode.Add(new ParsedStr("START DO", ""));
         }
 
         private void CheckAndCommentWhileConstruction(ref int index)
@@ -553,7 +548,7 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add("START WHILE |" + stringWhile.Match(programStrings[index]).Groups["ConditionWHILE"]);
+            parsedCode.Add(new ParsedStr("START WHILE", "" + stringWhile.Match(programStrings[index]).Groups["ConditionWHILE"]));
             callCycle.Push("WHILE");
             if (programStrings[index + 1] == "{")
             {
@@ -572,7 +567,8 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add("START DEFAULT |");
+            parsedCode.Add(new ParsedStr("START DEFAULT", ""));
+
             if (programStrings[index + 1] == "{")
             {
                 Brackets.Push(true);
@@ -590,8 +586,9 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add("START CASE |" +
-            stringCase.Match(programStrings[index]).Groups["variant"]);
+            parsedCode.Add(new ParsedStr("START CASE", "" +
+                stringCase.Match(programStrings[index]).Groups["variant"]));
+
             if (stringCase.IsMatch(programStrings[index + 1]))
             {
                 index++;
@@ -616,8 +613,8 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add("SWITCH |" +
-                stringSwitch.Match(programStrings[index]).Groups["variableSWITCH"]);
+            parsedCode.Add(new ParsedStr("SWITCH", "" +
+                stringSwitch.Match(programStrings[index]).Groups["variableSWITCH"]));
             Brackets.Push(true);
             index++;
         }
@@ -628,8 +625,8 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add("START IF |" +
-                stringIf.Match(programStrings[index]).Groups["ConditionIF"]);
+            parsedCode.Add(new ParsedStr("START IF", "" +
+                stringIf.Match(programStrings[index]).Groups["ConditionIF"]));
             if (programStrings[index + 1] == "{")
             {
                 Brackets.Push(true);
@@ -649,8 +646,8 @@ namespace ParserCode
                 int countStr = countStrAfterConstruction.Pop();
                 countStrAfterConstruction.Push(++countStr);
                 countStrAfterConstruction.Push(0);
-                parsedCode.Add("START ELSEIF |" +
-                   stringIf.Match(programStrings[index + 1]).Groups["ConditionIF"]);
+                parsedCode.Add(new ParsedStr("START ELSEIF", "" +
+                    stringIf.Match(programStrings[index + 1]).Groups["ConditionIF"]));
                 index++;
                 if (programStrings[index + 1] == "{")
                 {
@@ -668,7 +665,7 @@ namespace ParserCode
                 int countStr = countStrAfterConstruction.Pop();
                 countStrAfterConstruction.Push(++countStr);
                 countStrAfterConstruction.Push(0);
-                parsedCode.Add("START ELSE |");
+                parsedCode.Add(new ParsedStr("START ELSE", "" ));
                 if (programStrings[index + 1] == "{")
                 {
                     index++;
@@ -687,9 +684,30 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add("VAR BLOCK |" + stringFor.Match(programStrings[index]).Groups["Iterators"]);
-            parsedCode.Add("START FOR |" + stringFor.Match(programStrings[index]).Groups["ConditionFOR"]);
+            parsedCode.Add(new ParsedStr("VAR BLOCK", "" + stringFor.Match(programStrings[index]).Groups["Iterators"]));
+            parsedCode.Add(new ParsedStr("START FOR", "" + stringFor.Match(programStrings[index]).Groups["ConditionFOR"]));
             iterators.Push("" + stringFor.Match(programStrings[index]).Groups["IteratorChanger"]);
+            callCycle.Push("FOR");
+            if (programStrings[index + 1] == "{")
+            {
+                Brackets.Push(true);
+                index++;
+            }
+            else
+            {
+                Brackets.Push(false);
+            }
+        }
+
+        private void CheckAndCommentForeachConstruction(ref int index)
+        {
+            callsConstructions.Push("FOREACH");
+            int countStr = countStrAfterConstruction.Pop();
+            countStrAfterConstruction.Push(++countStr);
+            countStrAfterConstruction.Push(0);
+            parsedCode.Add(new ParsedStr("VAR BLOCK", "" + stringFor.Match(programStrings[index]).Groups["Iterators"]));
+            parsedCode.Add(new ParsedStr("VAR BLOCK", "" + stringFor.Match(programStrings[index]).Groups["Iterators"]));
+            iterators.Push("" + stringForeach.Match(programStrings[index]).Groups["IteratorChanger"]);
             callCycle.Push("FOR");
             if (programStrings[index + 1] == "{")
             {
@@ -716,7 +734,7 @@ namespace ParserCode
                     {
                         if (iterators.Peek() != "")
                         {
-                            parsedCode.Add("VAR BLOCK |" + iterators.Pop());
+                            parsedCode.Add(new ParsedStr("VAR BLOCK", iterators.Pop()));
                         }
                         checkEndConstruction = true;
                         callCycle.Pop();
@@ -736,7 +754,7 @@ namespace ParserCode
                 case "DWHILE":
                     {
                         checkEndConstruction = true;
-                        parsedCode.Add("END " + callsConstructions.Pop() + " |" + stringDWhile.Match(programStrings[++index]).Groups["ConditionDWHILE"]);
+                        parsedCode.Add(new ParsedStr("END " + callsConstructions.Pop(), "" + stringDWhile.Match(programStrings[++index]).Groups["ConditionDWHILE"]));
                         Brackets.Pop();
                         countStrAfterConstruction.Pop();
                         callCycle.Pop();
@@ -765,7 +783,8 @@ namespace ParserCode
             }
             if (checkEndConstruction == true)
             {
-                parsedCode.Add("END " + callsConstructions.Pop() + " |");
+                parsedCode.Add(new ParsedStr("END " + callsConstructions.Pop(), ""));
+
                 Brackets.Pop();
                 countStrAfterConstruction.Pop();
             }
@@ -780,7 +799,7 @@ namespace ParserCode
                     {
                         if (iterators.Peek() != "")
                         {
-                            parsedCode.Add("VAR BLOCK |" + iterators.Pop());
+                            parsedCode.Add(new ParsedStr("VAR BLOCK", iterators.Pop()));
                         }
                         checkEndConstruction = true;
                         callCycle.Pop();
@@ -810,7 +829,7 @@ namespace ParserCode
             }
             if (checkEndConstruction == true)
             {
-                parsedCode.Add("END " + callsConstructions.Pop() + " |");
+                parsedCode.Add(new ParsedStr("END " + callsConstructions.Pop(), ""));
                 Brackets.Pop();
                 countStrAfterConstruction.Pop();
             }
@@ -820,7 +839,7 @@ namespace ParserCode
         {
             for (int i = 0; i < parsedCode.Count; i++)
             {
-                Console.WriteLine(parsedCode[i]);
+                parsedCode[i].Show();
             }
         }
     }

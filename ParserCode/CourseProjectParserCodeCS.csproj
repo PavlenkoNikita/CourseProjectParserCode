@@ -47,6 +47,7 @@
     <Compile Include="GetStringsCode.cs" />
     <Compile Include="InputCode.cs" />
     <Compile Include="OutputCodDescription.cs" />
+    <Compile Include="ParsedStr.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
