@@ -21,23 +21,30 @@ namespace ParserCode
             //string codeProgramString = "public double    Value () { int k = 8; if (true == true) for (int j = 0; i < 5; j++)  for (int k = 0; k < 5; k++) Console.WriteLine(\"\"); Object.Method.File(\"asdfasf\");}";
             //string codeProgramString = "private void CheckAndCommentMethodConstruction(ref int index) {  callsConstructions.Push(\"METHOD\");  Brackets.Push(true);  countStrAfterConstruction.Push(0); parsedCode.Add(\"START METHOD |\" + stringMethod.Match(programStrings[index]).Groups[\"ReturnTypeMethod\"] +\" \" + stringMethod.Match(programStrings[index]).Groups[\"MethodName\"] + \"(\" + stringMethod.Match(programStrings[index]).Groups[\"Params\"] + \")\"); index++;}  private void CheckAndCommentDWhileConstruction() {  callsConstructions.Push(\"DWHILE\");  Brackets.Push(true);int countStr = countStrAfterConstruction.Pop();  countStrAfterConstruction.Push(++countStr);countStrAfterConstruction.Push(0);  callCycle.Push(\"DWHILE\"); parsedCode.Add(\"START DO |\");  }";
 
-            //switch(5)
+            //switch (5)
             //{
-            //    case 1:
-            //        {
-            //            break;
-            //        }
-            //    default:
-            //        {
-            //            goto L1;
-            //            break;
-            //            L1:
-            //            break;
-            //        }
             //}
 
-            //Regex stringForeach = new Regex(@"^foreach\s?\(\s?(?<TypeVariable>[_A-Za-z0-9]+)\s(?<NameVariable>[_A-Za-z0-9]+) in (?<Collection>[_A-Za-z0-9\[\]]+)\s?\)$");
-            //Console.WriteLine(stringForeach.IsMatch("foreach(int a in massive)"));
+            //Stack<string> stackSwitch = new Stack<string>();
+            //Stack<Stack<string>> callSwitchConstruction = new Stack<Stack<string>>();
+            //stackSwitch.Push("SWITCH");
+            //stackSwitch.Push("CASE");
+            //callSwitchConstruction.Push(stackSwitch);
+
+            //stackSwitch = new Stack<string>();
+            //stackSwitch.Push("CASE");
+            //stackSwitch.Push("DEFAULT");
+            //callSwitchConstruction.Push(stackSwitch);
+            //for(; callSwitchConstruction.Count != 0; )
+            //{
+            //    Stack<string> tempStack = callSwitchConstruction.Pop();
+            //    for(; tempStack.Count != 0; )
+            //    {
+            //        Console.WriteLine(tempStack.Pop());
+            //    }
+
+            //}
+
 
 
             InputCode f = new InputCode("Test.txt");
@@ -51,6 +58,8 @@ namespace ParserCode
             CodeDescription codeDescription = new CodeDescription(g.linesProgram);
             codeDescription.LineReading();
             codeDescription.ShowCode();
+            OutputCodDescription outCode = new OutputCodDescription(codeDescription.parsedCode);
+            outCode.WriteInFile();
         }
     }
 }

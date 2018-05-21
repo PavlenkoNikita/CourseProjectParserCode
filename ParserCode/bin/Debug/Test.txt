@@ -1,7 +1,28 @@
-private void ConnectCodeList()
+private void CheckEndBlockConstructionBracket(ref int index)
         {
-            foreach(string s in listString)
+            bool checkEndConstruction = false;
+            switch (callsConstructions.Peek())
             {
-                codeString += s;
+                case "METHOD":
+                    {
+                        checkEndConstruction = true;
+                        break;
+                    }
+                case "FOR":
+                    {
+                        checkEndConstruction = true;
+                        callCycle.Pop();
+                        break;
+                    }
+                case "IF":
+                    {
+                        checkEndConstruction = true;
+                        break;
+                    }
+					default:
+					{
+						Console.WriteLine("asfdsdfgdsfg");
+						break;
+					}
             }
         }

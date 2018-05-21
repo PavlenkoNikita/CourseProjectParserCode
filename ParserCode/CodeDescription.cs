@@ -10,10 +10,11 @@ namespace ParserCode
     class CodeDescription
     {
         private Stack<string> callsConstructions;
-       // private Stack<string> iterators;
         private Stack<bool> Brackets;
         private Stack<int> countStrAfterConstruction;
         private Stack<string> callCycle;
+        private Stack<Stack<string>> callSwitchConstructions;
+        private Stack<string> callSwitch;
         private List<string> programStrings;
         public List<ParsedStr> parsedCode;
         private Regex stringMethod = new Regex(@"^(?<Accept>(static)*\s*(public|private|protected|internal|protected internal|private protected|)\s*(static)*)\s*(?<ReturnTypeMethod>[A-Za-z0-9\[\]_]+) (?<MethodName>[a-zA-Z0-9 _]+)\((?<Params>[A-Za-z0-9, _\[\]]*)\)$");
@@ -44,7 +45,8 @@ namespace ParserCode
             programStrings = linesCode;
             callsConstructions = new Stack<string>();
             Brackets = new Stack<bool>();
-            //iterators = new Stack<string>();
+            callSwitchConstructions = new Stack<Stack<string>>();
+            
             countStrAfterConstruction = new Stack<int>();
             callCycle = new Stack<string>();
             parsedCode = new List<ParsedStr>();
@@ -157,7 +159,7 @@ namespace ParserCode
             else if (stringStartGoto.IsMatch(programStrings[index]))
             {
                 parsedCode.Add(new ParsedStr("START LINK", programStrings[index]));
-                if (callsConstructions.Peek() == "CASE" || callsConstructions.Peek() == "DEFAULT")
+                if (callsConstructions.Peek() == "CASE")
                 {
                     if (Brackets.Peek() == true)
                     {
@@ -256,7 +258,7 @@ namespace ParserCode
             {
                 parsedCode.Add(new ParsedStr("RETURN", "" + stringReturn.Match(programStrings[index]).Groups["ReturnData"]));
                 
-                if (callsConstructions.Peek() == "CASE" || callsConstructions.Peek() == "DEFAULT")
+                if (callsConstructions.Peek() == "CASE")
                 {
                     parsedCode.Add(new ParsedStr("END METHOD", ""));
                     if (Brackets.Peek() == true)
@@ -375,7 +377,7 @@ namespace ParserCode
             }
             else if (stringBreak.IsMatch(programStrings[index]))
             {
-                if (callsConstructions.Peek() == "CASE" || callsConstructions.Peek() == "DEFAULT")
+                if (callsConstructions.Peek() == "CASE")
                 {
                     parsedCode.Add(new ParsedStr("END " + callsConstructions.Pop(), ""));
                     if (Brackets.Peek() == true)
@@ -563,12 +565,12 @@ namespace ParserCode
 
         private void CheckAndCommentDefault(ref int index)
         {
-            callsConstructions.Push("DEFAULT");
+            callsConstructions.Push("CASE");
+            //callSwitchConstruction.Pop().Pop();
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add(new ParsedStr("START ", ""));
-
+            parsedCode.Add(new ParsedStr("START CASE", ""));
             if (programStrings[index + 1] == "{")
             {
                 Brackets.Push(true);
@@ -583,6 +585,7 @@ namespace ParserCode
         private void CheckAndCommentCase(ref int index)
         {
             callsConstructions.Push("CASE");
+            //callSwitch.Push("CASE");
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
@@ -610,6 +613,13 @@ namespace ParserCode
         private void CheckAndCommentSwitchConstruction(ref int index)
         {
             callsConstructions.Push("SWITCH");
+            //if (callSwitch.Count != 0)
+            //{
+            //    callSwitchConstructions.Push(callSwitch);
+            //}
+            //callSwitch = new Stack<string>();
+            //callSwitch.Push();
+            //callSwitchConstructions.Push();
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
@@ -617,6 +627,10 @@ namespace ParserCode
                 stringSwitch.Match(programStrings[index]).Groups["variableSWITCH"]));
             Brackets.Push(true);
             index++;
+            
+            if (stringCase.IsMatch(programStrings[index]))
+            {
+            }
         }
 
         private void CheckAndCommentIfConstruction(ref int index)
@@ -771,6 +785,7 @@ namespace ParserCode
                     }
                 case "SWITCH":
                     {
+                        //callSwitch = 
                         checkEndConstruction = true;
                         break;
                     }
