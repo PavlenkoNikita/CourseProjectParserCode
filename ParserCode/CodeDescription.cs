@@ -15,6 +15,8 @@ namespace ParserCode
         private Stack<string> callCycle;
         private Stack<Stack<string>> callSwitchConstructions;
         private Stack<string> callSwitch;
+        private Stack<int> countCase;
+        private Stack<int> indexStartSwitch;
         private List<string> programStrings;
         public List<ParsedStr> parsedCode;
         private Regex stringMethod = new Regex(@"^(?<Accept>(static)*\s*(public|private|protected|internal|protected internal|private protected|)\s*(static)*)\s*(?<ReturnTypeMethod>[A-Za-z0-9\[\]_]+) (?<MethodName>[a-zA-Z0-9 _]+)\((?<Params>.*)\)$");
@@ -38,6 +40,7 @@ namespace ParserCode
         private Regex stringEndGoto = new Regex(@"^(?<NamePlaceTransition>.*):$");
         private Regex stringReturn = new Regex(@"^return\s?(?<ReturnData>.*)?;$");
         private Regex stringIncDec = new Regex(@"^(((\+\+)|(--))(?<Varivable>[_0-9a-zA-Z\[,\]]+))|((?<Varivable>[_0-9a-zA-Z\[,\]]+)((\+\+)|(--)));$");
+        private Regex stringUsing = new Regex(@"^using\s?\((?<Variable>.*)\)$");
 
 
         public CodeDescription(List<string> linesCode)
@@ -50,6 +53,8 @@ namespace ParserCode
             countStrAfterConstruction = new Stack<int>();
             callCycle = new Stack<string>();
             parsedCode = new List<ParsedStr>();
+            countCase = new Stack<int>();
+            indexStartSwitch = new Stack<int>();
         }
 
         public void LineReading()
@@ -70,7 +75,7 @@ namespace ParserCode
                     }
                     if (countStrAfterConstruction.Count != 0 && Brackets.Count != 0)
                     {
-                        if ((countStrAfterConstruction.Peek() == 1 && Brackets.Peek() == false) && (callsConstructions.Peek() != "CASE" && callsConstructions.Peek() != "DEFAULT"))
+                        if ((countStrAfterConstruction.Peek() == 1 && Brackets.Peek() == false) && callsConstructions.Peek() != "SWITCH")
                         {
                             CheckEndBlockConstructionNoBracket();
                         }
@@ -78,7 +83,7 @@ namespace ParserCode
                     //
                     if (CheckAndCommentSimpleLine(ref i) == true)
                     {
-                        while (countStrAfterConstruction.Peek() == 1 && Brackets.Peek() == false && (callsConstructions.Peek() != "CASE" && callsConstructions.Peek() != "DEFAULT"))
+                        while (countStrAfterConstruction.Peek() == 1 && Brackets.Peek() == false && callsConstructions.Peek() != "SWITCH")
                         {
                             CheckEndBlockConstructionNoBracket();
                         }
@@ -146,6 +151,7 @@ namespace ParserCode
                     }
                 }
             }
+
         }
 
         private bool CheckAndCommentSimpleLine(ref int index)
@@ -159,7 +165,7 @@ namespace ParserCode
             else if (stringStartGoto.IsMatch(programStrings[index]))
             {
                 parsedCode.Add(new ParsedStr("START LINK", programStrings[index]));
-                if (callSwitch.Count > 0)
+                if (callSwitch.Count > 0 && callsConstructions.Peek() == "SWITCH")
                 {
                     if (Brackets.Peek() == true)
                     {
@@ -170,11 +176,21 @@ namespace ParserCode
                         }
                         int tempCountBrackets = 0;
                         do
-                        {
+                        { 
                             if (programStrings[index + 1] == "}" && tempCountBrackets == 0 && callsConstructions.Peek() == "SIMPLE")
                             {
                                 index++;
                                 CheckEndBlockConstructionBracket(ref index);
+                            }
+                            if (stringEndGoto.IsMatch(programStrings[index + 1]) == true)
+                            {
+                                break;
+                            }
+                            else if (programStrings[index + 1] == "}" && tempCountBrackets == 0)
+                            {
+                                Brackets.Pop();
+                                parsedCode.Add(new ParsedStr("END " + callSwitch.Pop(), programStrings[index]));
+                                break;
                             }
                             index++;
                             if (programStrings[index] == "{")
@@ -185,8 +201,8 @@ namespace ParserCode
                             {
                                 tempCountBrackets--;
                             }
-
-                        } while (programStrings[index] != "}" && tempCountBrackets == 0);
+                            
+                        } while (true);
                     }
                     else
                     {
@@ -196,19 +212,27 @@ namespace ParserCode
                             CheckEndBlockConstructionBracket(ref index);
                         }
                         int tempCountBrackets = 0;
-                        while (programStrings[index + 1] != "}" && stringDefault.IsMatch(programStrings[index + 1]) != true && stringCase.IsMatch(programStrings[index + 1]) != true && tempCountBrackets == 0)
+                        while (true)
                         {
                             if (programStrings[index + 1] == "}" && tempCountBrackets == 0 && callsConstructions.Peek() == "SIMPLE")
                             {
                                 index++;
                                 CheckEndBlockConstructionBracket(ref index);
                             }
+                            else if (stringEndGoto.IsMatch(programStrings[index + 1]) == true && stringCase.IsMatch(programStrings[index+1]) == false && stringDefault.IsMatch(programStrings[index+1]) == false)
+                            {
+                                break;
+                            }
+                            else if ((programStrings[index + 1] == "}" || stringDefault.IsMatch(programStrings[index + 1]) == true || stringCase.IsMatch(programStrings[index + 1]) == true) && tempCountBrackets == 0)
+                            {
+                                parsedCode.Add(new ParsedStr("END " + callSwitch.Pop(), programStrings[index]));
+                                break;
+                            }
                             index++;
                             if (programStrings[index] == "{")
                             {
                                 tempCountBrackets++;
                             }
-
                             else if (programStrings[index] == "}")
                             {
                                 tempCountBrackets--;
@@ -216,7 +240,6 @@ namespace ParserCode
                         }
                         CheckEndBlockConstructionNoBracket();
                     }
-                    Brackets.Pop();
                 }
                 else
                 {
@@ -257,7 +280,7 @@ namespace ParserCode
             else if (stringReturn.IsMatch(programStrings[index]))
             {
                 parsedCode.Add(new ParsedStr("RETURN", "" + stringReturn.Match(programStrings[index]).Groups["ReturnData"]));
-                if (callSwitch.Count > 0)
+                if (callSwitch.Count > 0 && callsConstructions.Peek() == "SWITCH")
                 {
                     parsedCode.Add(new ParsedStr("END METHOD", ""));
                     if (Brackets.Peek() == true)
@@ -275,6 +298,17 @@ namespace ParserCode
                                 index++;
                                 CheckEndBlockConstructionBracket(ref index);
                             }
+                            if (stringEndGoto.IsMatch(programStrings[index + 1]) == true)
+                            {
+                                break;
+                            }
+                            else if (programStrings[index + 1] == "}" && tempCountBrackets == 0)
+                            {
+                                Brackets.Pop();
+                                index++;
+                                callSwitch.Pop();
+                                break;
+                            }
                             index++;
                             if (programStrings[index] == "{")
                             {
@@ -284,7 +318,7 @@ namespace ParserCode
                             {
                                 tempCountBrackets--;
                             }
-                        } while (programStrings[index] != "}" && tempCountBrackets == 0);
+                        } while (true);
                     }
                     else
                     {
@@ -301,8 +335,13 @@ namespace ParserCode
                                 index++;
                                 CheckEndBlockConstructionBracket(ref index);
                             }
-                            if ((programStrings[index + 1] == "}" || stringDefault.IsMatch(programStrings[index + 1]) == true || stringCase.IsMatch(programStrings[index + 1]) == true) && tempCountBrackets == 0)
+                            else if (stringEndGoto.IsMatch(programStrings[index+1]) == true && stringCase.IsMatch(programStrings[index+1]) == false && stringDefault.IsMatch(programStrings[index+1]) == false)
                             {
+                                break;
+                            }
+                            else if ((programStrings[index + 1] == "}" || stringDefault.IsMatch(programStrings[index + 1]) == true || stringCase.IsMatch(programStrings[index + 1]) == true) && tempCountBrackets == 0)
+                            {
+                                callSwitch.Pop();
                                 break;
                             }
                             index++;
@@ -317,7 +356,6 @@ namespace ParserCode
                         }
                         CheckEndBlockConstructionNoBracket();
                     }
-                    Brackets.Pop();
                 }
                 else
                 {
@@ -329,7 +367,6 @@ namespace ParserCode
                     {
                         parsedCode.Add(new ParsedStr("END METHOD", ""));
                     }
-
                     if (Brackets.Peek() == true && programStrings[index + 1] != "}")
                     {
                         if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "SIMPLE")
@@ -358,7 +395,6 @@ namespace ParserCode
                             {
                                 tempCountBrackets--;
                             }
-
                         }
                     }
                 }
@@ -369,6 +405,11 @@ namespace ParserCode
                 parsedCode.Add(new ParsedStr("VAR BLOCK", programStrings[index]));
                 checkBlock = true;
             }
+            else if (stringUsing.IsMatch(programStrings[index]))
+            {
+                parsedCode.Add(new ParsedStr("VAR BLOCK","" + stringUsing.Match(programStrings[index]).Groups["Variable"]));
+                checkBlock = true;
+            }
             else if (stringCallMethod.IsMatch(programStrings[index]))
             {
                 parsedCode.Add(new ParsedStr("FUNC BLOCK", programStrings[index]));
@@ -376,10 +417,8 @@ namespace ParserCode
             }
             else if (stringBreak.IsMatch(programStrings[index]))
             {
-                if (callSwitch.Count > 0)
+                if (callSwitch.Count > 0 && callsConstructions.Peek() == "SWITCH")
                 {
-
-                    parsedCode.Add(new ParsedStr("END " + callSwitch.Pop(), ""));
                     if (Brackets.Peek() == true)
                     {
                         if (programStrings[index + 1] == "}" && callsConstructions.Peek() == "SIMPLE")
@@ -395,6 +434,17 @@ namespace ParserCode
                                 index++;
                                 CheckEndBlockConstructionBracket(ref index);
                             }
+                            if (stringEndGoto.IsMatch(programStrings[index + 1]) == true)
+                            {
+                                break;
+                            }
+                            else if (programStrings[index + 1] == "}" && tempCountBrackets == 0)
+                            {
+                                parsedCode.Add(new ParsedStr("END " + callSwitch.Pop(), ""));
+                                index++;
+                                Brackets.Pop();
+                                break;
+                            }
                             index++;
                             if (programStrings[index] == "{")
                             {
@@ -404,7 +454,8 @@ namespace ParserCode
                             {
                                 tempCountBrackets--;
                             }
-                        } while (programStrings[index] != "}" && tempCountBrackets == 0);
+                            
+                        } while (true);
                     }
                     else
                     {
@@ -421,8 +472,13 @@ namespace ParserCode
                                 index++;
                                 CheckEndBlockConstructionBracket(ref index);
                             }
-                            if ((programStrings[index + 1] == "}" || stringDefault.IsMatch(programStrings[index + 1]) == true || stringCase.IsMatch(programStrings[index + 1]) == true) && tempCountBrackets == 0)
+                            else if (stringEndGoto.IsMatch(programStrings[index + 1]) == true && stringCase.IsMatch(programStrings[index]) == false && stringDefault.IsMatch(programStrings[index]) == false)
                             {
+                                break;
+                            }
+                            else if ((programStrings[index + 1] == "}" || stringDefault.IsMatch(programStrings[index + 1]) == true || stringCase.IsMatch(programStrings[index + 1]) == true) && tempCountBrackets == 0)
+                            {
+                                parsedCode.Add(new ParsedStr("END " + callSwitch.Pop(), ""));
                                 break;
                             }
                             index++;
@@ -437,8 +493,6 @@ namespace ParserCode
                         }
                         CheckEndBlockConstructionNoBracket();
                     }
-                    Brackets.Pop();
-
                 }
                 else
                 {
@@ -471,7 +525,6 @@ namespace ParserCode
                             {
                                 tempCountBrackets--;
                             }
-
                         }
                     }
                 }
@@ -494,6 +547,10 @@ namespace ParserCode
                         {
                             index++;
                             CheckEndBlockConstructionBracket(ref index);
+                        }
+                        if (stringEndGoto.IsMatch(programStrings[index + 1]) == true)
+                        {
+                            break;
                         }
                         if (programStrings[index + 1] == "}" && tempCountBrackets == 0)
                         {
@@ -566,12 +623,13 @@ namespace ParserCode
 
         private void CheckAndCommentDefault(ref int index)
         {
-            //callsConstructions.Push("CASE");
             callSwitch.Push("CASE");
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
             parsedCode.Add(new ParsedStr("START CASE", ""));
+            int temp = countCase.Pop();
+            countCase.Push(++temp);
             if (programStrings[index + 1] == "{")
             {
                 Brackets.Push(true);
@@ -585,20 +643,21 @@ namespace ParserCode
 
         private void CheckAndCommentCase(ref int index)
         {
-            //callsConstructions.Push("CASE");
             callSwitch.Push("CASE");
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
             parsedCode.Add(new ParsedStr("START CASE", "" +
                 stringCase.Match(programStrings[index]).Groups["variant"]));
-
+            int temp = countCase.Pop();
+            countCase.Push(++temp);
             if (stringCase.IsMatch(programStrings[index + 1]))
             {
                 index++;
-                callsConstructions.Pop();
+                callSwitch.Pop();
                 countStrAfterConstruction.Pop();
                 CheckAndCommentCase(ref index);
+                return;
             }
             if (programStrings[index + 1] == "{")
             {
@@ -622,8 +681,10 @@ namespace ParserCode
             int countStr = countStrAfterConstruction.Pop();
             countStrAfterConstruction.Push(++countStr);
             countStrAfterConstruction.Push(0);
-            parsedCode.Add(new ParsedStr("SWITCH", "" +
+            parsedCode.Add(new ParsedStr("START SWITCH", "" +
                 stringSwitch.Match(programStrings[index]).Groups["variableSWITCH"]));
+            indexStartSwitch.Push(parsedCode.Count - 1);
+            countCase.Push(0);
             Brackets.Push(true);
             index++;
         }
@@ -788,7 +849,9 @@ namespace ParserCode
                         {
                             callSwitch.Clear();
                         }
-
+                        int I = indexStartSwitch.Pop();
+                        string[] tempData = { parsedCode[I].Block, parsedCode[I].TextBlock };
+                        parsedCode[I] = new ParsedStr(tempData[0] + "[" + countCase.Pop() + "]", tempData[1]);
                         checkEndConstruction = true;
                         break;
                     }
@@ -806,7 +869,6 @@ namespace ParserCode
             if (checkEndConstruction == true)
             {
                 parsedCode.Add(new ParsedStr("END " + callsConstructions.Pop(), ""));
-
                 Brackets.Pop();
                 countStrAfterConstruction.Pop();
             }

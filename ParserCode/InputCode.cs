@@ -11,17 +11,15 @@ namespace ParserCode
     {
         public List<string> codeList { get; private set; }
         public string codeString { get; private set; }
-        private string pathToFile;
 
-        public InputCode(string path)
+        public InputCode()
         {
             codeList = new List<string>();
-            this.pathToFile = path;
         }
 
-        public void ReadFile()
+        public void ReadFile(string path)
         {
-            using (StreamReader streamReader = new StreamReader(pathToFile))
+            using (StreamReader streamReader = new StreamReader(path))
             {
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
@@ -30,11 +28,6 @@ namespace ParserCode
                 }
             }
             DeleteCommentary();
-        }
-
-        public void ReadForm()
-        {
-
         }
 
         private void DeleteCommentary()
@@ -63,7 +56,7 @@ namespace ParserCode
                             if (codeList[i].Length == 0)
                             {
                                 codeList.Remove(codeList[i]);
-                               i--;
+                                i--;
                             }
                             break;
                         }

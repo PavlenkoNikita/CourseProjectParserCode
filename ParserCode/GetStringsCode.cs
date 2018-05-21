@@ -32,7 +32,6 @@ namespace ParserCode
 
         public void shareString(string codeProgramString)
         {
-
             codeProgramString = Regex.Replace(codeProgramString, @"\s+", " ");
             int countBrackets = 0;
             bool singleQuotes = false;
@@ -40,7 +39,7 @@ namespace ParserCode
             string sentence = "";
             char symb;
             int ind = 0;
-            
+
             do
             {
                 symb = codeProgramString[ind];
@@ -56,17 +55,49 @@ namespace ParserCode
                 }
                 if (doubleQuotes == true && symb == '\\' && codeProgramString[0] == '\"')
                 {
-                    if (codeProgramString[0] == '\"')
-                    {
-                        sentence += '\"';
-                    }
-                    else
-                    {
-                        sentence += '\'';
-                    }
+                    sentence += symb;
+                    sentence = sentence.Remove(sentence.Length - 1, 1);
+                    sentence += '\"';
                     codeProgramString = codeProgramString.Remove(0, 1);
                     continue;
                 }
+                //if (doubleQuotes == false && singleQuotes == false)
+                //{
+                //    if (symb == ' ')
+                //    {
+                //        if (sentence.Length != 0)
+                //        {
+                //            if (sentence[sentence.Length - 1] == ' ')
+                //            {
+                //                continue;
+                //            }
+                //        }
+                //        if (sentence == "")
+                //        {
+                //            continue;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        if (codeProgramString.Length > 1)
+                //        {
+                //            if (sentence.Length != 0)
+                //            {
+                //                if (sentence[sentence.Length - 1] == ' ')
+                //                {
+                //                    while (codeProgramString[0] == ' ' && codeProgramString[1] == ' ')
+                //                    {
+                //                        codeProgramString = codeProgramString.Remove(0, 1);
+                //                        if (codeProgramString.Length == 0)
+                //                        {
+                //                            break;
+                //                        }
+                //                    }
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
                 if (stringSwitch.IsMatch(sentence) == true && doubleQuotes == false && singleQuotes == false)
                 {
                     addString(ref sentence);
@@ -140,9 +171,16 @@ namespace ParserCode
                     {
                         sentence += symb;
                     }
-                    if (codeProgramString[ind] == ' ')
+                    if (codeProgramString.Length != 0)
                     {
-                        codeProgramString = codeProgramString.Remove(0, 1);
+                        while (codeProgramString[0] == ' ')
+                        {
+                            codeProgramString = codeProgramString.Remove(0, 1);
+                            if (codeProgramString.Length == 0)
+                            {
+                                break;
+                            }
+                        }
                     }
                 }
                 else if (symb == '(')
@@ -156,9 +194,17 @@ namespace ParserCode
                     }
                     countBrackets++;
                     sentence += symb;
-                    if (codeProgramString[ind] == ' ')
+
+                    if (codeProgramString.Length != 0)
                     {
-                        codeProgramString = codeProgramString.Remove(0, 1);
+                        while (codeProgramString[0] == ' ')
+                        {
+                            codeProgramString = codeProgramString.Remove(0, 1);
+                            if (codeProgramString.Length == 0)
+                            {
+                                break;
+                            }
+                        }
                     }
                 }
                 else if (symb == '{' && singleQuotes == false && doubleQuotes == false)
@@ -199,9 +245,17 @@ namespace ParserCode
                         addString(ref sentence);
                         addSymbAndWriteString(ref sentence, ref symb);
                     }
-                    if (codeProgramString[ind] == ' ')
+
+                    if (codeProgramString.Length != 0)
                     {
-                        codeProgramString = codeProgramString.Remove(0, 1);
+                        while (codeProgramString[0] == ' ')
+                        {
+                            codeProgramString = codeProgramString.Remove(0, 1);
+                            if (codeProgramString.Length == 0)
+                            {
+                                break;
+                            }
+                        }
                     }
                     if (sentence == "" && stringEndSentence.IsMatch(codeProgramString[ind].ToString()) == true)
                     {
@@ -221,12 +275,21 @@ namespace ParserCode
                         }
                     }
                     countBrackets--;
-                    if (codeProgramString[ind] == ' ')
+
+                    if (codeProgramString.Length != 0)
                     {
-                        codeProgramString = codeProgramString.Remove(0, 1);
+                        while (codeProgramString[0] == ' ')
+                        {
+                            codeProgramString = codeProgramString.Remove(0, 1);
+                            if (codeProgramString.Length == 0)
+                            {
+                                break;
+                            }
+                        }
                     }
                     if (countBrackets == 0 && stringEndSentence.IsMatch(codeProgramString[ind].ToString()) == true)
                     {
+
                         addSymbAndWriteString(ref sentence, ref symb);
                         continue;
                     }

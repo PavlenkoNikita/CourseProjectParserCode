@@ -1,0 +1,24 @@
+ static public void ChangeField()
+        {
+            
+            // так нельзя
+            int K = 34;
+            switch (K)
+            {
+                case 1:
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            if (i == 8)
+                                break;
+                            else
+                                return;
+                        }
+                        break;
+                    }
+                default:
+                    Console.WriteLine("Hello World");
+                    break;
+            }
+            
+        }
