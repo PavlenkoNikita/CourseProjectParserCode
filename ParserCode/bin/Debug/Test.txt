@@ -1,17 +1,13 @@
-private void CheckEndBlockConstructionBracket(ref int index)
+private void CheckEndBlockConstructionNoBracket()
         {
             bool checkEndConstruction = false;
             switch (callsConstructions.Peek())
             {
-                case "METHOD":
-                    {
-                        checkEndConstruction = true;
-                        break;
-                    }
                 case "FOR":
                     {
                         checkEndConstruction = true;
                         callCycle.Pop();
+						return;
                         break;
                     }
                 case "IF":
@@ -19,10 +15,48 @@ private void CheckEndBlockConstructionBracket(ref int index)
                         checkEndConstruction = true;
                         break;
                     }
-					default:
-					{
-						Console.WriteLine("asfdsdfgdsfg");
-						break;
-					}
+                case "WHILE":
+                    {
+                        checkEndConstruction = true;
+                        callCycle.Pop();
+                        break;
+                    }
+                case "ELSE":
+                    {
+                        checkEndConstruction = true;
+                        break;
+                    }
             }
-        }
+            
+        }}
+		private void CheckEndBlockConstructionNoBracket2()
+        {
+            bool checkEndConstruction = false;
+            switch (callsConstructions.Peek())
+            {
+                case "FOR":
+                    {
+                        checkEndConstruction = true;
+                        callCycle.Pop();
+						return;
+                        break;
+                    }
+                case "IF":
+                    {
+                        checkEndConstruction = true;
+                        break;
+                    }
+                case "WHILE":
+                    {
+                        checkEndConstruction = true;
+                        callCycle.Pop();
+                        break;
+                    }
+                case "ELSE":
+                    {
+                        checkEndConstruction = true;
+                        break;
+                    }
+            }
+            
+        }}

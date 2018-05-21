@@ -28,11 +28,21 @@ namespace ParserCode
                         {
                             if (DescriptCode[i].Block == "END METHOD")
                             {
-                                break;
+                                if (i + 1 != DescriptCode.Count)
+                                {
+                                    if (DescriptCode[i+1].Block == "START METHOD")
+                                    {
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    break;
+                                }
                             }
                             else
                             {
-                                sw.WriteLine(DescriptCode[i].Block + " " + DescriptCode[i].TextBlock);
+                                sw.WriteLine(DescriptCode[i].Block + "| " + DescriptCode[i].TextBlock);
                             }
                         }
                     }

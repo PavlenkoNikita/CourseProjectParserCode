@@ -21,8 +21,16 @@ namespace ParserCode
             //string codeProgramString = "public double    Value () { int k = 8; if (true == true) for (int j = 0; i < 5; j++)  for (int k = 0; k < 5; k++) Console.WriteLine(\"\"); Object.Method.File(\"asdfasf\");}";
             //string codeProgramString = "private void CheckAndCommentMethodConstruction(ref int index) {  callsConstructions.Push(\"METHOD\");  Brackets.Push(true);  countStrAfterConstruction.Push(0); parsedCode.Add(\"START METHOD |\" + stringMethod.Match(programStrings[index]).Groups[\"ReturnTypeMethod\"] +\" \" + stringMethod.Match(programStrings[index]).Groups[\"MethodName\"] + \"(\" + stringMethod.Match(programStrings[index]).Groups[\"Params\"] + \")\"); index++;}  private void CheckAndCommentDWhileConstruction() {  callsConstructions.Push(\"DWHILE\");  Brackets.Push(true);int countStr = countStrAfterConstruction.Pop();  countStrAfterConstruction.Push(++countStr);countStrAfterConstruction.Push(0);  callCycle.Push(\"DWHILE\"); parsedCode.Add(\"START DO |\");  }";
 
-            //switch (5)
+            //switch (1)
             //{
+            //    case 1:
+            //        {
+            //            for (int i = 0; i < 5; i++)
+            //            {
+            //                break;
+            //            }
+            //            break;
+            //        }
             //}
 
             //Stack<string> stackSwitch = new Stack<string>();
