@@ -19,7 +19,7 @@ namespace ParserCode
         private Stack<int> indexStartSwitch;
         private List<string> programStrings;
         public List<ParsedStr> parsedCode;
-        private Regex stringMethod = new Regex(@"^(?<Accept>(static)*\s*(public|private|protected|internal|protected internal|private protected|)\s*(static)*)\s*(?<ReturnTypeMethod>[A-Za-z0-9\[\]_]+) (?<MethodName>[a-zA-Z0-9 _]+)\((?<Params>.*)\)$");
+        private Regex stringMethod = new Regex(@"^(?<Accept>(static)*\s*(public|private|protected|internal|protected internal|private protected|)\s*(static)*)\s*(?<ReturnTypeMethod>[A-Za-z0-9\[\]_<>]+) (?<MethodName>[a-zA-Z0-9 _]+)\((?<Params>.*)\)$");
         private Regex stringInputOutput = new Regex(@"^Console.(Write|Read).*\((?<IOText>.*)\);$");
         private Regex stringSwitch = new Regex(@"^switch\s?\((?<variableSWITCH>.+)\)$");
         private Regex stringCase = new Regex(@"^case (?<variant>.+):$");

@@ -45,11 +45,21 @@ namespace ParserCode
                 symb = codeProgramString[ind];
                 codeProgramString = codeProgramString.Remove(0, 1);
 
-                if (singleQuotes == true && symb == '\\' && codeProgramString[0] == '\'')
+                if (singleQuotes == true && symb == '\\')
                 {
-                    sentence += symb;
-                    sentence = sentence.Remove(sentence.Length - 1, 1);
-                    sentence += '\'';
+                    if (codeProgramString[0] == '\'')
+                    {
+                        sentence += symb;
+                        sentence = sentence.Remove(sentence.Length - 1, 1);
+                        sentence += '\'';
+                    }
+                    if (codeProgramString[0] == '\"')
+                    {
+                        sentence += symb;
+                        sentence = sentence.Remove(sentence.Length - 1, 1);
+                        sentence += '\"';
+                    }
+
                     codeProgramString = codeProgramString.Remove(0, 1);
                     continue;
                 }
@@ -61,43 +71,6 @@ namespace ParserCode
                     codeProgramString = codeProgramString.Remove(0, 1);
                     continue;
                 }
-                //if (doubleQuotes == false && singleQuotes == false)
-                //{
-                //    if (symb == ' ')
-                //    {
-                //        if (sentence.Length != 0)
-                //        {
-                //            if (sentence[sentence.Length - 1] == ' ')
-                //            {
-                //                continue;
-                //            }
-                //        }
-                //        if (sentence == "")
-                //        {
-                //            continue;
-                //        }
-                //    }
-                //    else
-                //    {
-                //        if (codeProgramString.Length > 1)
-                //        {
-                //            if (sentence.Length != 0)
-                //            {
-                //                if (sentence[sentence.Length - 1] == ' ')
-                //                {
-                //                    while (codeProgramString[0] == ' ' && codeProgramString[1] == ' ')
-                //                    {
-                //                        codeProgramString = codeProgramString.Remove(0, 1);
-                //                        if (codeProgramString.Length == 0)
-                //                        {
-                //                            break;
-                //                        }
-                //                    }
-                //                }
-                //            }
-                //        }
-                //    }
-                //}
                 if (stringSwitch.IsMatch(sentence) == true && doubleQuotes == false && singleQuotes == false)
                 {
                     addString(ref sentence);
@@ -191,8 +164,8 @@ namespace ParserCode
                         {
                             sentence = sentence.Remove(sentence.Length - 1, 1);
                         }
+                        countBrackets++;
                     }
-                    countBrackets++;
                     sentence += symb;
 
                     if (codeProgramString.Length != 0)
