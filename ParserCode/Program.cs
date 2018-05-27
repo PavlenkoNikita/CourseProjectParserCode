@@ -13,17 +13,21 @@ namespace ParserCode
         static void Main(string[] args)
         {
             InputCode f = new InputCode();
+            //Считывание кода с файла в List + удаление комментариев
             f.ReadFile("Test.txt");
-            string s = f.codeString;
             Console.WriteLine("-------Code--------");
             GetStringsCode g = new GetStringsCode();
-            g.shareString(s);
+            //Деление одной строки кода на подстроки кода
+            g.shareString(f.codeString);
             g.Show();
             Console.WriteLine("-------Description code--------");
             CodeDescription codeDescription = new CodeDescription(g.linesProgram);
+            //Разбор кода
             codeDescription.LineReading();
             codeDescription.ShowCode();
+           
             OutputCodDescription outCode = new OutputCodDescription(codeDescription.parsedCode);
+            //Формирование файлов с названием методов + записывание их содержимого
             outCode.WriteInFile();
         }
     }

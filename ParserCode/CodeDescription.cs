@@ -151,7 +151,6 @@ namespace ParserCode
                     }
                 }
             }
-
         }
 
         private bool CheckAndCommentSimpleLine(ref int index)
@@ -851,7 +850,7 @@ namespace ParserCode
                         }
                         int I = indexStartSwitch.Pop();
                         string[] tempData = { parsedCode[I].Block, parsedCode[I].TextBlock };
-                        parsedCode[I] = new ParsedStr(tempData[0] + "[" + countCase.Pop() + "]", tempData[1]);
+                        parsedCode[I] = new ParsedStr(tempData[0] + "|" + countCase.Pop(), tempData[1]);
                         checkEndConstruction = true;
                         break;
                     }

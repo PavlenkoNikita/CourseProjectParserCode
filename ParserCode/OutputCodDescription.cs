@@ -24,11 +24,12 @@ namespace ParserCode
                 {
                     if (DescriptCode[i + 1].Block == "END METHOD")
                     {
+                        i++;
                         continue;
                     }
                     using (StreamWriter sw = new StreamWriter(DescriptCode[i].TextBlock + ".txt"))
                     {
-                        for (i++; i < DescriptCode.Count; i++)
+                        for (; i < DescriptCode.Count; i++)
                         {
                             if (DescriptCode[i].Block == "END METHOD")
                             {
@@ -36,11 +37,13 @@ namespace ParserCode
                                 {
                                     if (DescriptCode[i+1].Block == "START METHOD")
                                     {
+                                        sw.WriteLine(DescriptCode[i].Block + "| " + DescriptCode[i].TextBlock);
                                         break;
                                     }
                                 }
                                 else
                                 {
+                                    sw.WriteLine(DescriptCode[i].Block + "| " + DescriptCode[i].TextBlock);
                                     break;
                                 }
                             }

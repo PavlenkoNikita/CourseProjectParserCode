@@ -1,5 +1,0 @@
-VAR BLOCK| int result = 0;
-START FOR| int i = 0;i < integers.Length;i++
-VAR BLOCK| result +=(integers[i]*k);
-END FOR| 
-IO BLOCK| result
