@@ -27,6 +27,7 @@ namespace ParserCode
                     codeList.Add(line);
                 }
             }
+            if (codeList.Count == 0) throw new MyException("Файл пуст");
             DeleteCommentary();
         }
 

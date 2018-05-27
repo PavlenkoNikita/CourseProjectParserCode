@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ParserCode
 {
@@ -17,9 +18,9 @@ namespace ParserCode
             this.Block = Block;
         }
 
-        public void Show()
+        public void Show(ListBox lb)
         {
-            Console.WriteLine(Block + "| " + TextBlock);
+            lb.Items.Add(Block + "| " + TextBlock);
         }
     }
 }

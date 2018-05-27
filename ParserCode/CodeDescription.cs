@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ParserCode
 {
@@ -919,11 +920,11 @@ namespace ParserCode
             }
         }
 
-        public void ShowCode()
+        public void ShowCode(ListBox lb)
         {
             foreach (ParsedStr s in parsedCode)
             {
-                s.Show();
+                s.Show(lb);
             }
         }
     }

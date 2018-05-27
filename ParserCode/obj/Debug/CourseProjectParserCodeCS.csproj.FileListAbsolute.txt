@@ -19,3 +19,5 @@ D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\CoursePr
 D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\CourseProjectParserCodeCS.csproj.CoreCompileInputs.cache
 D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\ParserCode.exe
 D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\ParserCode.pdb
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\ParserCode.Form.resources
+D:\CourseProjectParserCode\CourseProjectParserCode\ParserCode\obj\Debug\CourseProjectParserCodeCS.csproj.GenerateResource.cache

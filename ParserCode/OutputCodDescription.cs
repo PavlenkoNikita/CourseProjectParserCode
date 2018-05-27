@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace ParserCode
 {
@@ -16,7 +17,7 @@ namespace ParserCode
             this.DescriptCode = Dcode;
         }
 
-        public void WriteInFile()
+        public void WriteInFile(string path)
         {
             for (int i = 0; i < DescriptCode.Count; i++)
             {
@@ -27,7 +28,7 @@ namespace ParserCode
                         i++;
                         continue;
                     }
-                    using (StreamWriter sw = new StreamWriter(DescriptCode[i].TextBlock + ".txt"))
+                    using (StreamWriter sw = new StreamWriter(path + "\\" + DescriptCode[i].TextBlock + ".txt"))
                     {
                         for (; i < DescriptCode.Count; i++)
                         {
