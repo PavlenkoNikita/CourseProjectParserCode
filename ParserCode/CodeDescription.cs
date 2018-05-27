@@ -711,11 +711,11 @@ namespace ParserCode
         {
             if (stringIf.IsMatch(programStrings[index + 1]) == true)
             {
-                callsConstructions.Push("IF");
+                callsConstructions.Push("ELSEIF");
                 int countStr = countStrAfterConstruction.Pop();
                 countStrAfterConstruction.Push(++countStr);
                 countStrAfterConstruction.Push(0);
-                parsedCode.Add(new ParsedStr("START IF", "" +
+                parsedCode.Add(new ParsedStr("START ELSEIF", "" +
                     stringIf.Match(programStrings[index + 1]).Groups["ConditionIF"]));
                 index++;
                 if (programStrings[index + 1] == "{")
@@ -823,6 +823,11 @@ namespace ParserCode
                         checkEndConstruction = true;
                         break;
                     }
+                case "ELSEIF":
+                    {
+                        checkEndConstruction = true;
+                        break;
+                    }
                 case "WHILE":
                     {
                         checkEndConstruction = true;
@@ -885,6 +890,11 @@ namespace ParserCode
                         break;
                     }
                 case "IF":
+                    {
+                        checkEndConstruction = true;
+                        break;
+                    }
+                case "ELSEIF":
                     {
                         checkEndConstruction = true;
                         break;
