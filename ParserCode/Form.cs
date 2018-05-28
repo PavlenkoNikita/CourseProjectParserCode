@@ -20,7 +20,7 @@ namespace ParserCode
         bool isParsedCode = false;
 
         public Form()
-        {            
+        {
             InitializeComponent();
         }
 
@@ -35,17 +35,18 @@ namespace ParserCode
                     input = new InputCode();
                     shareCode = new GetStringsCode();
                     LB_CodeProgram.Items.Clear();
+                    LB_ParsedCode.Items.Clear();
                     input.ReadFile(OpenFile.FileName);
                     shareCode.shareString(input.codeString);
                     shareCode.Show(LB_CodeProgram);
                     isFileChosen = true;
                     isParsedCode = false;
                 }
-                catch(MyException ex)
+                catch (MyException ex)
                 {
                     MessageBox.Show(ex.Message, "Ошибка");
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message, "Ошибка");
                 }
@@ -58,14 +59,14 @@ namespace ParserCode
             {
                 if (isFileChosen == true)
                 {
-                LB_ParsedCode.Items.Clear();
-                parsingCode = new CodeDescription(shareCode.linesProgram);
-                parsingCode.LineReading();
-                parsingCode.ShowCode(LB_ParsedCode);
-                isParsedCode = true;
+                    LB_ParsedCode.Items.Clear();
+                    parsingCode = new CodeDescription(shareCode.linesProgram);
+                    parsingCode.LineReading();
+                    parsingCode.ShowCode(LB_ParsedCode);
+                    isParsedCode = true;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Ошибка");
             }
@@ -75,10 +76,21 @@ namespace ParserCode
         {
             if (isParsedCode == true)
             {
-                output = new OutputCodDescription(parsingCode.parsedCode);
-                if (SaveFile.ShowDialog() == DialogResult.OK)
+                try
                 {
-                    output.WriteInFile(SaveFile.SelectedPath);
+                    output = new OutputCodDescription(parsingCode.parsedCode);
+                    if (SaveFile.ShowDialog() == DialogResult.OK)
+                    {
+                        output.WriteInFile(SaveFile.SelectedPath);
+                    }
+                }
+                catch (MyException ex)
+                {
+                    MessageBox.Show(ex.Message, "Ошибка");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Ошибка");
                 }
             }
         }

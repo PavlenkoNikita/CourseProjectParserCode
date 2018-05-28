@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ParserCode
@@ -24,7 +25,11 @@ namespace ParserCode
                 string line;
                 while ((line = streamReader.ReadLine()) != null)
                 {
-                    codeList.Add(line);
+                    string temp = Regex.Replace(line, @"\s+", " ");
+                    if (temp != "" && temp != " ")
+                    {
+                        codeList.Add(line);
+                    }
                 }
             }
             if (codeList.Count == 0) throw new MyException("Файл пуст");

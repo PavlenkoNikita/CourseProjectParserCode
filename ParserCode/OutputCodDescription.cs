@@ -19,12 +19,14 @@ namespace ParserCode
 
         public void WriteInFile(string path)
         {
+            int countEmptyMethod = 0;
             for (int i = 0; i < DescriptCode.Count; i++)
             {
                 if (DescriptCode[i].Block == "START METHOD")
                 {
                     if (DescriptCode[i + 1].Block == "END METHOD")
                     {
+                        countEmptyMethod++;
                         i++;
                         continue;
                     }
@@ -55,6 +57,10 @@ namespace ParserCode
                         }
                     }
                 }
+            }
+            if (countEmptyMethod == DescriptCode.Count/2)
+            {
+                throw new MyException("Файлы созданы не будут, т.к. все методы в файле пусты.");
             }
         }
     }
